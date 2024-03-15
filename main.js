@@ -23,27 +23,20 @@ app.get('/', (req, res) => {
 server.listen(serverPort, () => {
     console.log("Apache server initalized...");
     console.log('Server started on port', serverPort);
-    //triggerDataFetch();
+    triggerDataFetch();
 });
 
-io.on('connection', (socket) => {
-    console.log("Got connection from user! Waiting for taksearch...")
-    socket.on('takSearch', (tak) => {
-        console.log(triggerDataFetch(tak));
-    });
+io.on('takSearch', (socket) => {
     
 });
 
-async function triggerDataFetch(tak) {
-    console.log("Fetching new data...");
-    const data = await fetchData();
-    const filteredData = data.filter(item => item.tak === tak);
-    io.emit('takSearch', filteredData);
-    console.log("Data fetch completed.");
-    // this part is only for when it is continuous
-    //console.log("Data fetch completed. Wait 5 seconds before next fetch!");
-    //await sleep.usleep(5000000);
-    // also add while true cycle
+async function triggerDataFetch() {
+    while (true) {
+        console.log("Fetching new data...");
+        await fetchData();
+        console.log("Data fetch completed. Wait 5 seconds before next fetch!");
+        await sleep.usleep(5000000);
+    }
 }
 
 async function fetchData() {
@@ -51,7 +44,6 @@ async function fetchData() {
         const response = await axios.get(url);
         if (response.status === 200) {
             const lines = response.data.split('\n');
-            const result = [];
             lines.forEach(line => {
                 if (line) {
                     const data = line.split(',');
@@ -78,27 +70,23 @@ async function fetchData() {
                                     transportTypeDecoded = "Unknown";
                                     break;
                             }
-
-                            result.push({
-                                transportType: transportTypeDecoded,
-                                lineNumber,
-                                longitude,
-                                latitude,
-                                tak
-                            });
+                            console.log("Transport Type:", transportTypeDecoded);
+                            console.log("Line Number:", lineNumber);
+                            console.log("Latitude:", latitude);
+                            console.log("Longitude:", longitude);
+                            console.log("Decoded address:");
+                            console.log("TAK:", tak);
+                            console.log();
                         } catch (error) {
                             console.log("Invalid data format!", line);
                         }
                     }
                 }
             });
-            return result;
         } else {
             console.log("Data fetch fail! Got status:", response.status);
-            return [];
         }
     } catch (error) {
         console.error("Error fetching data:", error);
-        return [];
     }
 }

@@ -38,17 +38,8 @@
 
   // Function to handle form submission
   document.getElementById('search-form').addEventListener('submit', function(event) {
-    //event.preventDefault(); // Prevent the form from submitting normally
     var tak = document.getElementById('bus-id').value.trim();
     socket.emit('takSearch', tak);
-  });
-socket.on('takSearch', function(data) {
-    // Process the received data and update the map accordingly
-    // For example:
-    data.forEach(function(item) {
-      var marker = L.marker([item.latitude, item.longitude]).addTo(map);
-      marker.bindPopup(`Transport Type: ${item.transportType}<br>Line Number: ${item.lineNumber}<br>TAK: ${item.tak}`);
-    });
   });
 
 </script>
