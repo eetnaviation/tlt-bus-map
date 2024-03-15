@@ -38,12 +38,18 @@
 
   // Function to handle form submission
   document.getElementById('search-form').addEventListener('submit', function(event) {
+    event.preventDefault();
     var tak = document.getElementById('bus-id').value.trim();
     socket.emit('takSearch', tak);
   });
 
-  socket.on('takResults', () => {
+  socket.on('takResults', (data) => {
     console.log("yay :)");
+    console.log(data);
+    /*// Add markers for each bus location
+    data.forEach(function(bus) {
+      L.marker([bus.latitude, bus.longitude]).addTo(map);
+    });*/
   });
 
 </script>
