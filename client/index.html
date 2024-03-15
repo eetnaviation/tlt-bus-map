@@ -27,7 +27,7 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
+  var socket = io();
 
   // Stuff for the map
   var map = L.map('map').setView([59.4370, 24.7536], 12);
@@ -40,6 +40,10 @@
   document.getElementById('search-form').addEventListener('submit', function(event) {
     var tak = document.getElementById('bus-id').value.trim();
     socket.emit('takSearch', tak);
+  });
+
+  socket.on('takResults', () => {
+    console.log("yay :)");
   });
 
 </script>

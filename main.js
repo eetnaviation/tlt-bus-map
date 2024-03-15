@@ -28,16 +28,23 @@ server.listen(serverPort, () => {
 
 io.on('connection', (socket) => {
     socket.on('takSearch', (tak) => {
-        console.log("Input tak: " + tak);
-        fetchData(tak);
+        try {
+            console.log("Input tak: " + tak);
+            let takSearchResults = fetchData(tak);
+            socket.emit('takResults', takSearchResults);
+        } catch {
+
+        }
     });
 });
 
-async function triggerDataFetch() {
-    console.log("Fetching new data...");
-    await fetchData();
-    console.log("Data fetch completed. Wait 5 seconds before next fetch!");
-    //await sleep.usleep(5000000);
+async function triggerConstantDataFetch() {
+    while (true) {
+        console.log("Fetching new data...");
+        await fetchData();
+        console.log("Data fetch completed. Wait 5 seconds before next fetch!");
+        await sleep.usleep(5000000);
+    }
 }
 
 async function fetchData(takInput) {
