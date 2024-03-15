@@ -25,7 +25,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
+  const socket = io();
+
+  // Stuff for the map
   var map = L.map('map').setView([59.4370, 24.7536], 12);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -34,33 +38,17 @@
 
   // Function to handle form submission
   document.getElementById('search-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+    //event.preventDefault(); // Prevent the form from submitting normally
     var tak = document.getElementById('bus-id').value.trim();
-    if (tak) {
-      fetch('https://transport.tallinn.ee/gps.txt')
-        .then(response => response.text())
-        .then(data => {
-          var lines = data.trim().split('\n');
-          lines.forEach(function(line) {
-            var fields = line.split(',');
-            if (fields[2] === tak) {
-              var lat = parseFloat(fields[3]);
-              var lon = parseFloat(fields[4]);
-              if (!isNaN(lat) && !isNaN(lon)) {
-                map.setView([lat, lon], 15);
-                L.marker([lat, lon]).addTo(map)
-                  .bindPopup('Bus ID (TAK): ' + tak).openPopup();
-              }
-            }
-          });
-        })
-        .catch(error => {
-          console.error('Error fetching bus data:', error);
-          alert('Error fetching bus data. Please try again later.');
-        });
-    } else {
-      alert('Please enter a Bus ID (TAK).');
-    }
+    socket.emit('takSearch', tak);
+  });
+socket.on('takSearch', function(data) {
+    // Process the received data and update the map accordingly
+    // For example:
+    data.forEach(function(item) {
+      var marker = L.marker([item.latitude, item.longitude]).addTo(map);
+      marker.bindPopup(`Transport Type: ${item.transportType}<br>Line Number: ${item.lineNumber}<br>TAK: ${item.tak}`);
+    });
   });
 
 </script>
