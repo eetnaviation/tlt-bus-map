@@ -29,8 +29,8 @@ async function triggerDataFetch() {
     while (true) {
         console.log("Fetching new data...");
         await fetchData();
-        console.log("Data fetch completed.");
-        await sleep(5000);
+        console.log("Data fetch completed. Wait 5 seconds before next fetch!");
+        await sleep.usleep(5000000);
     }
 }
 
