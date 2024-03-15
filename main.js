@@ -23,23 +23,24 @@ app.get('/', (req, res) => {
 server.listen(serverPort, () => {
     console.log("Apache server initalized...");
     console.log('Server started on port', serverPort);
-    triggerDataFetch();
+    //triggerDataFetch();
 });
 
-io.on('takSearch', (socket) => {
-    
+io.on('connection', (socket) => {
+    socket.on('takSearch', (tak) => {
+        console.log("Input tak: " + tak);
+        fetchData(tak);
+    });
 });
 
 async function triggerDataFetch() {
-    while (true) {
-        console.log("Fetching new data...");
-        await fetchData();
-        console.log("Data fetch completed. Wait 5 seconds before next fetch!");
-        await sleep.usleep(5000000);
-    }
+    console.log("Fetching new data...");
+    await fetchData();
+    console.log("Data fetch completed. Wait 5 seconds before next fetch!");
+    //await sleep.usleep(5000000);
 }
 
-async function fetchData() {
+async function fetchData(takInput) {
     try {
         const response = await axios.get(url);
         if (response.status === 200) {
@@ -70,13 +71,15 @@ async function fetchData() {
                                     transportTypeDecoded = "Unknown";
                                     break;
                             }
-                            console.log("Transport Type:", transportTypeDecoded);
-                            console.log("Line Number:", lineNumber);
-                            console.log("Latitude:", latitude);
-                            console.log("Longitude:", longitude);
-                            console.log("Decoded address:");
-                            console.log("TAK:", tak);
-                            console.log();
+                            if (tak == takInput) {
+                                console.log("Transport Type:", transportTypeDecoded);
+                                console.log("Line Number:", lineNumber);
+                                console.log("Latitude:", latitude);
+                                console.log("Longitude:", longitude);
+                                console.log("Decoded address:");
+                                console.log("TAK:", tak);
+                                console.log();
+                            }
                         } catch (error) {
                             console.log("Invalid data format!", line);
                         }
