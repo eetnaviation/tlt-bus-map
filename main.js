@@ -1,4 +1,4 @@
-let serverPort = 3000;
+let serverPort = 80;
 const url = "http://transport.tallinn.ee/gps.txt";
 
 const express = require('express');
