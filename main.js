@@ -20,8 +20,8 @@ let requestedTak = "Unfetched";
 
 console.log("Server initalize!");
 
-app.get('/tltmap', (req, res) => {
-    console.log("Init /tltmap");
+app.get('/', (req, res) => {
+    console.log("Requested / . Fetching!");
     //index.html
     res.sendFile(__dirname + '/client/index.html');
 });
