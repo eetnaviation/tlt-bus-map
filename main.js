@@ -79,6 +79,9 @@ async function fetchData(takInput) {
                                 case 3:
                                     transportTypeDecoded = "TRAM";
                                     break;
+                                case 7:
+                                    transportTypeDecoded = "NIGHTBUS";
+                                    break;
                                 default:
                                     transportTypeDecoded = "Unknown";
                                     break;
