@@ -10,7 +10,6 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const axios = require('axios');
 const fs = require('node:fs');
-var sleep = require('sleep');
 
 
 let requestedType = "Unfetched";
@@ -50,7 +49,6 @@ async function triggerConstantDataFetch() {
         console.log("Fetching new data...");
         await fetchData();
         console.log("Data fetch completed. Wait 5 seconds before next fetch!");
-        await sleep.usleep(5000000);
     }
 }
 
