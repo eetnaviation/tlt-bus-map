@@ -12,6 +12,13 @@ const axios = require('axios');
 const fs = require('node:fs');
 var sleep = require('sleep');
 
+
+let requestedType = "Unfetched";
+let requestedLine = "Unfetched";
+let requestedLat = "Unfetched";
+let requestedLong = "Unfetched";
+let requestedTak = "Unfetched";
+
 console.log("Server initalize!");
 
 app.get('/', (req, res) => {
@@ -30,8 +37,8 @@ io.on('connection', (socket) => {
     socket.on('takSearch', (tak) => {
         try {
             console.log("Input tak: " + tak);
-            let takSearchResults = fetchData(tak);
-            socket.emit('takResults', takSearchResults);
+            fetchData(tak);
+            socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak);
         } catch {
 
         }
@@ -79,6 +86,12 @@ async function fetchData(takInput) {
                                     break;
                             }
                             if (tak == takInput) {
+                                requestedType = transportTypeDecoded;
+                                requestedLine = lineNumber;
+                                requestedLat = latitude;
+                                requestedLong = longitude;
+                                requestedTak = tak;
+                                console.log("Requested data fetched:");
                                 console.log("Transport Type:", transportTypeDecoded);
                                 console.log("Line Number:", lineNumber);
                                 console.log("Latitude:", latitude);

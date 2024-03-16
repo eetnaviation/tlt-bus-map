@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,48 +12,54 @@
     }
   </style>
 </head>
+
 <body>
 
-<h2>Bus Location Finder</h2>
-<form id="search-form">
-  <label for="bus-id">Enter Bus ID (TAK):</label>
-  <input type="text" id="bus-id" name="bus-id">
-  <button type="submit">Search</button>
-</form>
+  <h2>Bus Location Finder</h2>
+  <form id="search-form">
+    <label for="bus-id">Enter Bus ID (TAK):</label>
+    <input type="text" id="bus-id" name="bus-id">
+    <button type="submit">Search</button>
+  </form>
 
-<div id="map"></div>
+  <div id="map"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io();
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    
+    // Stuff for the map
+    var map = L.map('map').setView([59.4370, 24.7536], 12);
 
-  // Stuff for the map
-  var map = L.map('map').setView([59.4370, 24.7536], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
+    // Function to handle form submission
+    document.getElementById('search-form').addEventListener('submit', function (event) {
+      event.preventDefault();
+      var tak = document.getElementById('bus-id').value.trim();
+      socket.emit('takSearch', tak);
+    });
+    socket.on('takResults', (type, line, lat, long, tak) => {
+      console.log("Datafetch success");
+      console.log("Transport Type:", type);
+      console.log("Line Number:", line);
+      console.log("Latitude:", lat);
+      console.log("Longitude:", long);
+      console.log("TAK:", tak);
+      console.log();
+      /*// Add markers for each bus location
+      data.forEach(function(bus) {
+        L.marker([bus.latitude, bus.longitude]).addTo(map);
+      });*/
+    });
 
-  // Function to handle form submission
-  document.getElementById('search-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    var tak = document.getElementById('bus-id').value.trim();
-    socket.emit('takSearch', tak);
-  });
-
-  socket.on('takResults', (data) => {
-    console.log("yay :)");
-    console.log(data);
-    /*// Add markers for each bus location
-    data.forEach(function(bus) {
-      L.marker([bus.latitude, bus.longitude]).addTo(map);
-    });*/
-  });
-
-</script>
+  </script>
 
 </body>
+
 </html>
