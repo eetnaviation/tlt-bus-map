@@ -20,7 +20,7 @@ let requestedTak = "Unfetched";
 
 console.log("Server initalize!");
 
-app.get('/', (req, res) => {
+app.get('/tltmap', (req, res) => {
     console.log("Init root /");
     //index.html
     res.sendFile(__dirname + '/client/index.html');
