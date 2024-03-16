@@ -21,6 +21,13 @@
     <input type="text" id="bus-id" name="bus-id">
     <button type="submit">Search</button>
   </form>
+  <form id="recievedData">
+    <p id="type">Type: UNFETCHED</p>
+    <p id="line">Current line: UNFETCHED</p>
+    <p id="lat">Latitude: UNFETCHED</p>
+    <p id="long">Longitude: UNFETCHED</p>
+    <p id="tak">TAK: UNFETCHED</p>
+  </form>
 
   <div id="map"></div>
 
@@ -44,15 +51,19 @@
       var tak = document.getElementById('bus-id').value.trim();
       socket.emit('takSearch', tak);
     });
-    socket.on('takResults', (type, line, lat, long, tak) => {
+    socket.on('takResults', (typeR, lineR, latR, longR, takR) => {
       console.log("Datafetch success");
-      console.log("Transport Type:", type);
-      console.log("Line Number:", line);
-      console.log("Latitude:", lat);
-      console.log("Longitude:", long);
-      console.log("TAK:", tak);
+      console.log("Transport Type:", typeR);
+      console.log("Line Number:", lineR);
+      console.log("Latitude:", latR);
+      console.log("Longitude:", longR);
+      console.log("TAK:", takR);
       console.log();
-      alert("Type:", type, " ; Line:", line, " ; Lat:", lat ," ; Long:", long, " ; TAK:", tak);
+      document.getElementById("type").innerHTML = "Type:" + typeR;
+      document.getElementById("line").innerHTML = "Current line:" + lineR;
+      document.getElementById("lat").innerHTML = "Latitude:" + latR;
+      document.getElementById("long").innerHTML = "Longitude:" + longR;
+      document.getElementById("tak").innerHTML = "TAK:" + takR;
       /*// Add markers for each bus location
       data.forEach(function(bus) {
         L.marker([bus.latitude, bus.longitude]).addTo(map);
