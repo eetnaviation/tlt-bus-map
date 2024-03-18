@@ -21,7 +21,7 @@ let requestedTak = "Unfetched";
 console.log("Server initalize!");
 
 app.get('/', (req, res) => {
-    console.log("Requested / . Fetching!");
+    console.log("Requested / (index.html). Fetching!");
     //index.html
     res.sendFile(__dirname + '/client/index.html');
 });
@@ -36,8 +36,7 @@ io.on('connection', (socket) => {
     socket.on('takSearch', (tak) => {
         try {
             console.log("Input tak: " + tak);
-            fetchData(tak);
-            socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak);
+            fetchData(tak, socket);
         } catch {
 
         }
@@ -52,11 +51,12 @@ async function triggerConstantDataFetch() {
     }
 }
 
-async function fetchData(takInput) {
+async function fetchData(takInput, socket) {
     try {
         const response = await axios.get(url);
         if (response.status === 200) {
             const lines = response.data.split('\n');
+            let takFound = 0;
             lines.forEach(line => {
                 if (line) {
                     const data = line.split(',');
@@ -67,8 +67,9 @@ async function fetchData(takInput) {
                             const longitude = parseInt(data[2]) / 1000000;
                             const latitude = parseInt(data[3]) / 1000000;
                             const tak = data[6];
-
+                            
                             let transportTypeDecoded;
+
                             switch (transportType) {
                                 case 1:
                                     transportTypeDecoded = "TROLL";
@@ -79,11 +80,15 @@ async function fetchData(takInput) {
                                 case 3:
                                     transportTypeDecoded = "TRAM";
                                     break;
+                                case 7:
+                                    transportTypeDecoded = "NIGHTBUS";
+                                    break;
                                 default:
                                     transportTypeDecoded = "Unknown";
                                     break;
                             }
                             if (tak == takInput) {
+                                takFound = 1;
                                 requestedType = transportTypeDecoded;
                                 requestedLine = lineNumber;
                                 requestedLat = latitude;
@@ -97,6 +102,16 @@ async function fetchData(takInput) {
                                 console.log("Decoded address:");
                                 console.log("TAK:", tak);
                                 console.log();
+                                socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak);
+                            }
+                            else if (tak != takInput && takFound != 1) {
+                                takFound = 0;
+                                let busNotFoundText = "BUS NOT FOUND!";
+                                requestedType = busNotFoundText;
+                                requestedLine = busNotFoundText;
+                                requestedLat = busNotFoundText;
+                                requestedLong = busNotFoundText;
+                                requestedTak = busNotFoundText;
                             }
                         } catch (error) {
                             console.log("Invalid data format!", line);
