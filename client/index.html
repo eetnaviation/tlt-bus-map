@@ -26,7 +26,9 @@
     <p id="line">Current line: UNFETCHED</p>
     <p id="lat">Latitude: UNFETCHED</p>
     <p id="long">Longitude: UNFETCHED</p>
+    <p id="latlong">Coordinates (Merged): UNFETCHED</p>
     <p id="tak">TAK: UNFETCHED</p>
+    <p id="vehicleInfo">Vehicle info: UNFETCHED</p>
   </form>
 
   <div id="map"></div>
@@ -51,19 +53,22 @@
       var tak = document.getElementById('bus-id').value.trim();
       socket.emit('takSearch', tak);
     });
-    socket.on('takResults', (typeR, lineR, latR, longR, takR) => {
+    socket.on('takResults', (typeR, lineR, latR, longR, takR, latlongR, vehicleTypeR) => {
       console.log("Datafetch success");
       console.log("Transport Type:", typeR);
       console.log("Line Number:", lineR);
       console.log("Latitude:", latR);
       console.log("Longitude:", longR);
+      console.log("Lat long MERGE:", latlongR);
       console.log("TAK:", takR);
-      console.log();
+      console.log("Vehicle info: ", vehicleTypeR);
       document.getElementById("type").innerHTML = "Type:" + typeR;
       document.getElementById("line").innerHTML = "Current line:" + lineR;
       document.getElementById("lat").innerHTML = "Latitude:" + latR;
       document.getElementById("long").innerHTML = "Longitude:" + longR;
+      document.getElementById("latlong").innerHTML = "Coordinates (Merged):" + latlongR;
       document.getElementById("tak").innerHTML = "TAK:" + takR;
+      document.getElementById("vehicleInfo").innerHTML = "Vehicle info:" + vehicleTypeR;
       /*// Add markers for each bus location
       data.forEach(function(bus) {
         L.marker([bus.latitude, bus.longitude]).addTo(map);

@@ -11,15 +11,17 @@ const io = new Server(server);
 const axios = require('axios');
 const fs = require('node:fs');
 
+let cafTramTakArray = ["502", "520", "505", "518", "513", "507"];
 
 let requestedType = "Unfetched";
 let requestedLine = "Unfetched";
 let requestedLat = "Unfetched";
 let requestedLong = "Unfetched";
 let requestedTak = "Unfetched";
+let vehicleType = "Unfetched";
+let requestedLatLong = "Unfetched";
 
 console.log("Server initalize!");
-
 app.get('/', (req, res) => {
     console.log("Requested / (index.html). Fetching!");
     //index.html
@@ -88,21 +90,33 @@ async function fetchData(takInput, socket) {
                                     break;
                             }
                             if (tak == takInput) {
+                                if (transportTypeDecoded == "TRAM") {
+                                    if (cafTramTakArray.includes(tak)) {
+                                        vehicleType = "CAF Urbos (Spain) (Overhead 600V, Motor 264 kW) 70km/h TOP";
+                                    }
+                                    else {
+                                        vehicleType = "-- INFO UNAVAIL. --";
+                                    }
+                                }
+                                else {
+                                    vehicleType = "Unfetched";
+                                }
                                 takFound = 1;
                                 requestedType = transportTypeDecoded;
                                 requestedLine = lineNumber;
                                 requestedLat = latitude;
                                 requestedLong = longitude;
+                                requestedLatLong = String(latitude) + " " + String(longitude);
                                 requestedTak = tak;
                                 console.log("Requested data fetched:");
                                 console.log("Transport Type:", transportTypeDecoded);
                                 console.log("Line Number:", lineNumber);
                                 console.log("Latitude:", latitude);
                                 console.log("Longitude:", longitude);
-                                console.log("Decoded address:");
+                                console.log("Merged coordinates:", requestedLatLong);
                                 console.log("TAK:", tak);
                                 console.log();
-                                socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak);
+                                socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak, requestedLatLong, vehicleType);
                             }
                             else if (tak != takInput && takFound != 1) {
                                 takFound = 0;
