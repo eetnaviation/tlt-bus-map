@@ -27,9 +27,6 @@ app.get('/', (req, res) => {
     //index.html
     res.sendFile(__dirname + '/client/index.html');
 });
-app.get('/velendeulogo.png', (req, res) => {
-    res.sendFile(__dirname + '/client/velendeulogo.png');
-});
 
 server.listen(serverPort, () => {
     console.log("Apache server initalized...");
