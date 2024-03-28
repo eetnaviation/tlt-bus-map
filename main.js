@@ -22,6 +22,9 @@ let vehicleType = "Unfetched";
 let requestedLatLong = "Unfetched";
 
 console.log("Server initalize!");
+
+app.use(express.static('client'))
+
 app.get('/', (req, res) => {
     console.log("Requested / (index.html). Fetching!");
     //index.html
