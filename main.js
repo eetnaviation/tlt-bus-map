@@ -1,4 +1,4 @@
-let serverPort = 80;
+let serverPort = 4000;
 const url = "http://transport.tallinn.ee/gps.txt";
 
 const express = require('express');
@@ -25,7 +25,7 @@ console.log("Server initalize!");
 
 app.use(express.static('client'))
 
-app.get('/', (req, res) => {
+app.get('/tltmap', (req, res) => {
     console.log("Requested / (index.html). Fetching!");
     //index.html
     res.sendFile(__dirname + '/client/index.html');
