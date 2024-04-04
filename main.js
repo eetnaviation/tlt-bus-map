@@ -1,4 +1,4 @@
-let serverPort = 4000;
+let serverPort = 80;
 const url = "http://transport.tallinn.ee/gps.txt";
 
 const express = require('express');
@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const axios = require('axios');
-const fs = require('node:fs');
+const fs = require('fs');
 
 let cafTramTakArray = ["502", "520", "505", "518", "513", "507"];
 
