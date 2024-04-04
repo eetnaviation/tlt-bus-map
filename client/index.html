@@ -58,6 +58,7 @@
 
     map.addLayer(mapnik);
     map.setCenter(position, zoom);
+    
 
     // Function to handle form submission
     document.getElementById('search-form').addEventListener('submit', function (event) {
@@ -74,17 +75,19 @@
       console.log("Lat long MERGE:", latlongR);
       console.log("TAK:", takR);
       console.log("Vehicle info: ", vehicleTypeR);
-      document.getElementById("type").innerHTML = "Type:" + typeR;
-      document.getElementById("line").innerHTML = "Current line:" + lineR;
-      document.getElementById("lat").innerHTML = "Latitude:" + latR;
-      document.getElementById("long").innerHTML = "Longitude:" + longR;
-      document.getElementById("latlong").innerHTML = "Coordinates (Merged):" + latlongR;
-      document.getElementById("tak").innerHTML = "TAK:" + takR;
-      document.getElementById("vehicleInfo").innerHTML = "Vehicle info:" + vehicleTypeR;
-      /*// Add markers for each bus location
-      data.forEach(function(bus) {
-        L.marker([bus.latitude, bus.longitude]).addTo(map);
-      });*/
+      var markerLonLat = new OpenLayers.LonLat(longR, latR).transform(fromProjection, toProjection); // Set marker location
+      document.getElementById("type").innerHTML = "Type: " + typeR;
+      document.getElementById("line").innerHTML = "Current line: " + lineR;
+      document.getElementById("lat").innerHTML = "Latitude: " + latR;
+      document.getElementById("long").innerHTML = "Longitude: " + longR;
+      document.getElementById("latlong").innerHTML = "Coordinates (Merged): " + latlongR;
+      document.getElementById("tak").innerHTML = "TAK: " + takR;
+      document.getElementById("vehicleInfo").innerHTML = "Vehicle info: " + vehicleTypeR;
+      // Add marker
+      var markers = new OpenLayers.Layer.Markers("Markers");
+      map.addLayer(markers);
+      markers.addMarker(new OpenLayers.Marker(markerLonLat));
+      map.setCenter(position, zoom);
     });
 
   </script>
