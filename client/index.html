@@ -34,21 +34,30 @@
     <p id="vehicleInfo">Vehicle info: UNFETCHED</p>
   </form>
 
-  <div id="map"></div>
+  <div id="demoMap" style="height:512px"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
-
+  <script src="OpenLayers.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+
   <script>
     var socket = io();
     
     // Stuff for the map
-    var map = L.map('map').setView([59.4370, 24.7536], 12);
+    //map = new OpenLayers.Map("demoMap");//.setView([59.4370, 24.7536], 12);
+    //map.addLayer(new OpenLayers.Layer.OSM());
+    //map.zoomToMaxExtent();
+    
+    map = new OpenLayers.Map("demoMap");
+    var mapnik         = new OpenLayers.Layer.OSM();
+    var fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
+    var toProjection   = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
+    var position       = new OpenLayers.LonLat(24.7536, 59.4370).transform( fromProjection, toProjection);
+    var zoom           = 12; 
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    map.addLayer(mapnik);
+    map.setCenter(position, zoom);
 
     // Function to handle form submission
     document.getElementById('search-form').addEventListener('submit', function (event) {
