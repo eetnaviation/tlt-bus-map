@@ -31,6 +31,12 @@ app.get('/tltmap', (req, res) => {
     res.sendFile(__dirname + '/client/index.html');
 });
 
+app.get('/img/marker.png', (req, res) => {
+    var img = fs.readFileSync('./client/marker.png');
+    res.writeHead(200, {'Content-Type': 'image/png'});
+    res.end(img, 'binary');
+});
+
 server.listen(serverPort, () => {
     console.log("Apache server initalized...");
     console.log('Server started on port', serverPort);
