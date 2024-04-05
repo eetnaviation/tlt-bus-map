@@ -66,6 +66,7 @@
       var tak = document.getElementById('bus-id').value.trim();
       socket.emit('takSearch', tak);
     });
+    oldMarker = "1";
     socket.on('takResults', (typeR, lineR, latR, longR, takR, latlongR, vehicleTypeR) => {
       console.log("Datafetch success");
       console.log("Transport Type:", typeR);
@@ -86,9 +87,12 @@
       // Add marker
       var markers = new OpenLayers.Layer.Markers("Markers");
       map.addLayer(markers);
-      markers.clear()
-      markers.addMarker(new OpenLayers.Marker(markerLonLat));
-      map.setCenter(position, zoom);
+      if (oldMarker != "1") {
+        markers.removeMarker(oldMarker)
+      }
+      newMarker = new OpenLayers.Marker(markerLonLat)
+      markers.addMarker(newMarker);
+      oldMarker = newMarker;
     });
 
   </script>
