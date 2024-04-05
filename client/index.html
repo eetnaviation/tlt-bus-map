@@ -86,6 +86,7 @@
       // Add marker
       var markers = new OpenLayers.Layer.Markers("Markers");
       map.addLayer(markers);
+      markers.clear()
       markers.addMarker(new OpenLayers.Marker(markerLonLat));
       map.setCenter(position, zoom);
     });
