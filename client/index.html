@@ -58,12 +58,6 @@
 
     map.addLayer(mapnik);
     map.setCenter(position, zoom);
-    
-    map.getInteractions().forEach(function(interaction) {
-      if (interaction instanceof ol.interaction.MouseWheelZoom) {
-        interaction.setActive(false);
-      }
-    }, this);
 
     // Function to handle form submission
     document.getElementById('search-form').addEventListener('submit', function (event) {
