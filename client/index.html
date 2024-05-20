@@ -16,7 +16,7 @@
 
 <body>
   <picture>
-    <img src="http://assets.velend.eu:2052/assets/velend_eu-tltmap/velendeulogo.jpg" alt="velendeulogojpg" style="width:auto";>
+    <img src="http://assets.velend.eu:2052/assets/velend_eu-tltmap/velendeulogo.jpg" alt="velendeulogojpg" style="float: right; margin-left: 15px; width: 25%;";>
   </picture>
   <h2>TLT Location Finder</h2>
   <form id="search-form">
@@ -58,7 +58,6 @@
 
     map.addLayer(mapnik);
     map.setCenter(position, zoom);
-    
 
     // Function to handle form submission
     document.getElementById('search-form').addEventListener('submit', function (event) {
