@@ -1,8 +1,0 @@
-get url transport.tallinn.ee/gps.txt
-3,2,24786250,59429980,,302,98,Z,146
-a,b,c,d,,f,g
-a= 3: tram ; 2=bus ; 1: troll
-b= line
-c= long
-d= lat
-g= TAK

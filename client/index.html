@@ -16,13 +16,15 @@
 
 <body>
   <picture>
-    <img src="http://assets.velend.eu:2052/assets/velend_eu-tltmap/velendeulogo.jpg" alt="velendeulogojpg" style="float: right; margin-left: 15px; width: 25%;";>
+    <img src="http://assets.velend.eu:2052/assets/velend_eu-tltmap/velendeulogo.jpg" alt="velendeulogojpg" style="float: right; margin-left: 15px; width: 25%;">
   </picture>
   <h2>TLT Location Finder</h2>
   <form id="search-form">
     <label for="bus-id">Enter TAK:</label>
     <input type="text" id="bus-id" name="bus-id">
     <button type="submit">Search</button>
+   <!-- <button type="click" id="elektrolino">Electric bus search</button>
+    <button type="press" id="pesa">Pesa twist search</button> -->
   </form>
   <form id="recievedData">
     <p id="type">Type: UNFETCHED</p>
@@ -45,16 +47,12 @@
     var socket = io();//
     
     // Stuff for the map
-    //map = new OpenLayers.Map("demoMap");//.setView([59.4370, 24.7536], 12);
-    //map.addLayer(new OpenLayers.Layer.OSM());
-    //map.zoomToMaxExtent();
-    
     map = new OpenLayers.Map("demoMap");
-    var mapnik         = new OpenLayers.Layer.OSM();
+    var mapnik = new OpenLayers.Layer.OSM();
     var fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
-    var toProjection   = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
-    var position       = new OpenLayers.LonLat(24.7536, 59.4370).transform( fromProjection, toProjection);
-    var zoom           = 12; 
+    var toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
+    var position = new OpenLayers.LonLat(24.7536, 59.4370).transform(fromProjection, toProjection);
+    var zoom = 12; 
 
     map.addLayer(mapnik);
     map.setCenter(position, zoom);
@@ -65,6 +63,13 @@
       var tak = document.getElementById('bus-id').value.trim();
       socket.emit('takSearch', tak);
     });
+    /*document.getElementById('elektrolino').addEventListener('click', function () {
+      socket.emit('elektrolino');
+    });
+    document.getElementById('pesa').addEventListener('press', function () {
+      socket.emit('pesa');
+    });*/
+
     oldMarker = "1";
     socket.on('takResults', (typeR, lineR, latR, longR, takR, latlongR, vehicleTypeR) => {
       console.log("Datafetch success");
