@@ -1,113 +1,158 @@
 <!DOCTYPE html>
-<html lang="en">
+  <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TLT Location Finder</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <style>
-    #map {
-      height: 1000px;
-      width: 100%;
-    }
-  </style>
-</head>
-
-<body>
-  <picture>
-    <img src="http://assets.velend.eu:2052/assets/velend_eu-tltmap/velendeulogo.jpg" alt="velendeulogojpg" style="float: right; margin-left: 15px; width: 25%;">
-  </picture>
-  <h2>TLT Location Finder</h2>
-  <form id="search-form">
-    <label for="bus-id">Enter TAK:</label>
-    <input type="text" id="bus-id" name="bus-id">
-    <button type="submit">Search</button>
-  </form>
-  <form id="bulk-search">
-    <p>Bulk searches:</p>
-    <button type="click" id="electricbusSearch">Urbino Electric</button>
-    <button type="press" id="pesaSearch">Pesa Twist</button>
-  </form>
-  <form id="recievedData">
-    <p id="type">Type: UNFETCHED</p>
-    <p id="line">Current line: UNFETCHED</p>
-    <p id="lat">Latitude: UNFETCHED</p>
-    <p id="long">Longitude: UNFETCHED</p>
-    <p id="latlong">Coordinates (Merged): UNFETCHED</p>
-    <p id="tak">TAK: UNFETCHED</p>
-    <p id="vehicleInfo">Vehicle info: UNFETCHED</p>
-  </form>
-
-  <div id="demoMap" style="height:512px"></div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
-  <script src="OpenLayers.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-
-  <script>
-    var socket = io();//
-    
-    // Stuff for the map
-    map = new OpenLayers.Map("demoMap");
-    var mapnik = new OpenLayers.Layer.OSM();
-    var fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
-    var toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
-    var position = new OpenLayers.LonLat(24.7536, 59.4370).transform(fromProjection, toProjection);
-    var zoom = 12; 
-
-    map.addLayer(mapnik);
-    map.setCenter(position, zoom);
-
-    // Function to handle form submission
-    document.getElementById('search-form').addEventListener('submit', function (event) {
-      event.preventDefault();
-      var tak = document.getElementById('bus-id').value.trim();
-      socket.emit('takSearch', tak);
-    });
-    document.getElementById('bulk-search').addEventListener('submit', function (event) {
-      event.preventDefault();
-    });
-    document.getElementById('electricbusSearch').addEventListener('click', function () {
-      socket.emit('electricBusBulkSearch');
-    });
-    document.getElementById('pesaSearch').addEventListener('click', function () {
-      console.log("bruh");
-      socket.emit('pesaTramBulkSearch');
-    });
-
-    oldMarker = "1";
-    socket.on('takResults', (typeR, lineR, latR, longR, takR, latlongR, vehicleTypeR) => {
-      console.log("Datafetch success");
-      console.log("Transport Type:", typeR);
-      console.log("Line Number:", lineR);
-      console.log("Latitude:", latR);
-      console.log("Longitude:", longR);
-      console.log("Lat long MERGE:", latlongR);
-      console.log("TAK:", takR);
-      console.log("Vehicle info: ", vehicleTypeR);
-      var markerLonLat = new OpenLayers.LonLat(longR, latR).transform(fromProjection, toProjection); // Set marker location
-      document.getElementById("type").innerHTML = "Type: " + typeR;
-      document.getElementById("line").innerHTML = "Current line: " + lineR;
-      document.getElementById("lat").innerHTML = "Latitude: " + latR;
-      document.getElementById("long").innerHTML = "Longitude: " + longR;
-      document.getElementById("latlong").innerHTML = "Coordinates (Merged): " + latlongR;
-      document.getElementById("tak").innerHTML = "TAK: " + takR;
-      document.getElementById("vehicleInfo").innerHTML = "Vehicle info: " + vehicleTypeR;
-      // Add marker
-      var markers = new OpenLayers.Layer.Markers("Markers");
-      map.addLayer(markers);
-      if (oldMarker != "1") {
-        markers.removeMarker(oldMarker)
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TLT Location Finder</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+      #map {
+        height: 1000px;
+        width: 100%;
       }
-      newMarker = new OpenLayers.Marker(markerLonLat)
-      markers.addMarker(newMarker);
-      oldMarker = newMarker;
-    });
+    </style>
+  </head>
 
-  </script>
+  <body>
+    <picture>
+      <img src="http://assets.velend.eu:2052/assets/velend_eu-tltmap/velendeulogo.jpg" alt="velendeulogojpg" style="float: right; margin-left: 15px; width: 25%;">
+    </picture>
+    <h2>TLT Location Finder</h2>
+    <form id="search-form">
+      <label for="bus-id">Enter TAK:</label>
+      <input type="text" id="bus-id" name="bus-id">
+      <button type="submit">Search</button>
+    </form>
+    <form id="bulk-search">
+      <p>Bulk searches:</p>
+      <div>
+        <button type="press" id="pesaSearch">Pesa Twist</button>
+        <button type="click" id="cafSearch">CAF Urbos</button>
+        <button type="click" id="tatraSearch">Tatra trams</button>
+      </div>
+      <div>
+        <button type="click" id="a40Search">MAN a40</button>
+        <button type="click" id="a78Search">MAN a78</button>
+        <button type="click" id="a21Search">MAN a21</button>
+      </div>
+      <div>
+        <button type="click" id="volvo7900Search">Volvo 7900H</button>
+        <button type="click" id="electricbusSearch">Urbino Electric</button>
+      </div>
+      <div>
+        <button type="click" id="tramSearch">Show all trams</button>
+        <button type="click" id="busSearch">Show all buses</button>
+      </div>
+    </form>
+    <form id="recievedData">
+      <p id="type">Type: UNFETCHED</p>
+      <p id="line">Current line: UNFETCHED</p>
+      <p id="lat">Latitude: UNFETCHED</p>
+      <p id="long">Longitude: UNFETCHED</p>
+      <p id="latlong">Coordinates (Merged): UNFETCHED</p>
+      <p id="tak">TAK: UNFETCHED</p>
+      <p id="vehicleInfo">Vehicle info: UNFETCHED</p>
+    </form>
 
-</body>
+    <div id="map" style="height:512px"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+      var socket = io();
+
+      var map = L.map('map').setView([59.43041, 24.75924], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors | tlt-bus-map made by eetnaviation, velend.eu'
+      }).addTo(map);
+
+      var markers = {};
+
+      document.getElementById('search-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        var tak = document.getElementById('bus-id').value.trim();
+        socket.emit('takSearch', tak);
+      });
+
+      document.getElementById('bulk-search').addEventListener('submit', function (event) {
+        event.preventDefault();
+      });
+
+      document.getElementById('electricbusSearch').addEventListener('click', function () {
+        socket.emit('electricBusBulkSearch');
+      });
+
+      document.getElementById('pesaSearch').addEventListener('click', function () {
+        socket.emit('pesaTramBulkSearch');
+      });
+
+      document.getElementById('tramSearch').addEventListener('click', function () {
+        socket.emit('tramBulkSearch');
+      });
+
+      document.getElementById('busSearch').addEventListener('click', function () {
+        socket.emit('busBulkSearch');
+      });
+
+      document.getElementById('cafSearch').addEventListener('click', function () {
+        socket.emit('cafBulkSearch');
+      });
+
+      document.getElementById('tatraSearch').addEventListener('click', function () {
+        socket.emit('tatraBulkSearch');
+      });
+
+      document.getElementById('volvo7900Search').addEventListener('click', function () {
+        socket.emit('volvo7900BulkSearch');
+      });
+
+      document.getElementById('a78Search').addEventListener('click', function () {
+        socket.emit('a78BulkSearch');
+      });
+
+      document.getElementById('a21Search').addEventListener('click', function () {
+        socket.emit('a21BulkSearch');
+      });
+
+      document.getElementById('a40Search').addEventListener('click', function () {
+        socket.emit('a40BulkSearch');
+      });
+
+
+      socket.on('takResults', (typeR, lineR, latR, longR, takR, latlongR, vehicleTypeR) => {
+        console.log("Data fetch success");
+        console.log("Transport Type:", typeR);
+        console.log("Line Number:", lineR);
+        console.log("Latitude:", latR);
+        console.log("Longitude:", longR);
+        console.log("Coordinates (Merged):", latlongR);
+        console.log("TAK:", takR);
+        console.log("Vehicle info:", vehicleTypeR);
+
+        document.getElementById("type").innerHTML = "Type: " + typeR;
+        document.getElementById("line").innerHTML = "Current line: " + lineR;
+        document.getElementById("lat").innerHTML = "Latitude: " + latR;
+        document.getElementById("long").innerHTML = "Longitude: " + longR;
+        document.getElementById("latlong").innerHTML = "Coordinates (Merged): " + latlongR;
+        document.getElementById("tak").innerHTML = "TAK: " + takR;
+        document.getElementById("vehicleInfo").innerHTML = "Vehicle info: " + vehicleTypeR;
+
+        const iconUrl = typeR == "BUS" ? 'bus.png' : (typeR == "TROLL" ? 'troll.png' : 'tram.png');
+        
+        const markerPosition = [latR, longR];
+
+        if (!markers[takR]) {
+          markers[takR] = L.marker(markerPosition, {
+            icon: L.icon({ iconUrl: iconUrl })
+          }).bindPopup(`<b>Line:</b> ${lineR}<br><b>TAK:</b> ${takR}<br><b>Vehicle info:</b>${vehicleTypeR}`)
+            .addTo(map);
+        } else {
+          markers[takR].setLatLng(markerPosition);
+        }
+      });
+    </script>
+  </body>
 </html>
