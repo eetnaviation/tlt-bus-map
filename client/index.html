@@ -147,7 +147,7 @@
         if (!markers[takR]) {
           markers[takR] = L.marker(markerPosition, {
             icon: L.icon({ iconUrl: iconUrl })
-          }).bindPopup(`<b>Line:</b> ${lineR}<br><b>TAK:</b> ${takR}<br><b>Vehicle info:</b>${vehicleTypeR}`)
+          }).bindPopup(`<b>Line:</b> ${lineR}<br><b>TAK:</b> ${takR}<br><b>Vehicle info:</b> ${vehicleTypeR}`)
             .addTo(map);
         } else {
           markers[takR].setLatLng(markerPosition);
