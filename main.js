@@ -75,7 +75,35 @@ io.on('connection', (socket) => {
             startRequestModeFetch();
             fetchDataFromLocalFile(tak, socket);
         } catch (error) {
-            console.error("Error processing takSearch:", error);
+            var caughtError = "Error processing takSearch:", error;
+            console.error(caughtError);
+            writeToLog('errors_log.txt', caughtError);
+        }
+    });
+    socket.on('electricBusBulkSearch', async () => {
+        console.log("Running bulk electric bus search!");
+        saveRequestLogs(socket, "ElectricBusBulkSearch");
+        try {
+            electricBusTakArray.forEach((takToSearch) => {
+                fetchDataFromLocalFile(takToSearch, socket);
+            });
+        } catch (error) {
+            var caughtError = "Error processing electricBusBulkSearch:", error;
+            console.error(caughtError);
+            writeToLog('errors_log.txt', caughtError);
+        }
+    });
+    socket.on('pesaTramBulkSearch', async () => {
+        console.log("Running bulk pesa tram search!");
+        saveRequestLogs(socket, "PesaTramBulkSearch");
+        try {
+            pesaTramTakArray.forEach((takToSearch) => {
+                fetchDataFromLocalFile(takToSearch, socket);
+            });
+        } catch (error) {
+            var caughtError = "Error processing pesaTramBulkSearch: ", error;
+            console.error(caughtError);
+            writeToLog('errors_log.txt', caughtError);
         }
     });
 });
@@ -194,7 +222,7 @@ async function fetchDataFromLocalFile(takInput, socket) {
                         if (tak === takInput) {
                             if (transportTypeDecoded === "TRAM") {
                                 if (cafTramTakArray.includes(tak)) {
-                                    vehicleType = "CAF Urbos AXL (Spain) (Overhead 600V, Motor 264 kW) 70km/h TOP";
+                                    vehicleType = "CAF Urbos AXL";
                                 } else if (pesaTramTakArray.includes(tak)) {
                                     vehicleType = "PESA Twist 147N";
                                 } else if (kt6tmTramArray.includes(tak)) {

@@ -23,8 +23,11 @@
     <label for="bus-id">Enter TAK:</label>
     <input type="text" id="bus-id" name="bus-id">
     <button type="submit">Search</button>
-   <!-- <button type="click" id="elektrolino">Electric bus search</button>
-    <button type="press" id="pesa">Pesa twist search</button> -->
+  </form>
+  <form id="bulk-search">
+    <p>Bulk searches:</p>
+    <button type="click" id="electricbusSearch">Urbino Electric</button>
+    <button type="press" id="pesaSearch">Pesa Twist</button>
   </form>
   <form id="recievedData">
     <p id="type">Type: UNFETCHED</p>
@@ -63,12 +66,16 @@
       var tak = document.getElementById('bus-id').value.trim();
       socket.emit('takSearch', tak);
     });
-    /*document.getElementById('elektrolino').addEventListener('click', function () {
-      socket.emit('elektrolino');
+    document.getElementById('bulk-search').addEventListener('submit', function (event) {
+      event.preventDefault();
     });
-    document.getElementById('pesa').addEventListener('press', function () {
-      socket.emit('pesa');
-    });*/
+    document.getElementById('electricbusSearch').addEventListener('click', function () {
+      socket.emit('electricBusBulkSearch');
+    });
+    document.getElementById('pesaSearch').addEventListener('click', function () {
+      console.log("bruh");
+      socket.emit('pesaTramBulkSearch');
+    });
 
     oldMarker = "1";
     socket.on('takResults', (typeR, lineR, latR, longR, takR, latlongR, vehicleTypeR) => {
