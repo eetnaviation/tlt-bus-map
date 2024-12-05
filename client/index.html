@@ -43,6 +43,7 @@
       <div>
         <button type="click" id="tramSearch">Show all trams</button>
         <button type="click" id="busSearch">Show all buses</button>
+        <button type="click" id="continousAll">Show all vehicles live</button>
       </div>
     </form>
     <form id="recievedData">
@@ -119,6 +120,10 @@
 
       document.getElementById('a40Search').addEventListener('click', function () {
         socket.emit('a40BulkSearch');
+      });
+      
+      document.getElementById('continousAll').addEventListener('click', function () {
+        socket.emit('continousAllReq');
       });
 
 

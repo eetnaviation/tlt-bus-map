@@ -119,9 +119,9 @@ let requestedLatLong = "Unfetched";
 let isRequestMode = false;
 let requestModeIntervalId = null;
 let lastFetchTime = 0;
-const defaultFetchInterval = 120000;
-const requestModeInterval = 30000;
-const requestModeDuration = 120000;
+const defaultFetchInterval = 120000; //120sec
+const requestModeInterval = 30000; //30sec
+const requestModeDuration = 120000; //120sec
 
 console.log("Server initialized!");
 
@@ -418,8 +418,35 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             fetchDataFromLocalFileByTransportType("BUS", socket);
+            fetchDataFromLocalFileByTransportType("NIGHTBUS", socket);
         } catch (error) {
             var caughtError = "Error processing busBulkSearch: ", error;
+            console.error(caughtError);
+            writeToLog('errors_log.txt', caughtError);
+        }
+    });
+    socket.on('continousAllReq', async () => {
+        console.log("Started continousAllReq for socket", socket);
+        saveRequestLogs(socket, "ContinousAllReq");
+        try {
+            if (isRequestMode) {
+                const currentTime = Date.now();
+                if (currentTime - lastFetchTime >= requestModeInterval) {
+                    await fetchAndSaveData("Request Mode");
+                }
+            } else {
+                await fetchAndSaveData("Request Mode");
+            }
+            if (isRequestMode) {
+                clearInterval(requestModeIntervalId);
+            }
+            startRequestModeFetch();
+            fetchDataFromLocalFileByTransportType("BUS", socket);
+            fetchDataFromLocalFileByTransportType("TRAM", socket);
+            fetchDataFromLocalFileByTransportType("TROLL", socket);
+            fetchDataFromLocalFileByTransportType("NIGHTBUS", socket);
+        } catch (error) {
+            var caughtError = "Error processing continousAllReq: ", error;
             console.error(caughtError);
             writeToLog('errors_log.txt', caughtError);
         }
