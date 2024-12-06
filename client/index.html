@@ -29,6 +29,11 @@
       <input type="text" id="bus-line" name="bus-line">
       <button type="submit">Search by line</button>
     </form>
+    <form id="search-by-destination-form">
+      <label for="bus-destination">Enter DESTINATION:</label>
+      <input type="text" id="bus-destination" name="bus-destination">
+      <button type="submit">Search by destination</button>
+    </form>
     <form id="clear-map">
       <button type="submit">Clear map</button>
     </form>
@@ -62,6 +67,7 @@
       <p id="latlong">Coordinates (Merged): UNFETCHED</p>
       <p id="tak">TAK: UNFETCHED</p>
       <p id="vehicleInfo">Vehicle info: UNFETCHED</p>
+      <p id="destination">Destination: UNFETCHED</p>
     </form>
 
     <div id="map" style="height:512px"></div>
@@ -90,6 +96,12 @@
         event.preventDefault();
         var line = document.getElementById('bus-line').value.trim();
         socket.emit('lineSearch', line);
+      });
+
+      document.getElementById('search-by-destination-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        var destination = document.getElementById('bus-destination').value.trim();
+        socket.emit('destinationSearch', destination);
       });
 
       document.getElementById('clear-map').addEventListener('submit', function (event) {
@@ -156,7 +168,7 @@
       });
 
 
-      socket.on('takResults', (typeR, lineR, latR, longR, takR, latlongR, vehicleTypeR) => {
+      socket.on('takResults', (typeR, lineR, latR, longR, takR, latlongR, vehicleTypeR, destinationR) => {
         console.log("Data fetch success");
         console.log("Transport Type:", typeR);
         console.log("Line Number:", lineR);
@@ -165,6 +177,7 @@
         console.log("Coordinates (Merged):", latlongR);
         console.log("TAK:", takR);
         console.log("Vehicle info:", vehicleTypeR);
+        console.log("Destination:", destinationR);
 
         document.getElementById("type").innerHTML = "Type: " + typeR;
         document.getElementById("line").innerHTML = "Current line: " + lineR;
@@ -173,6 +186,7 @@
         document.getElementById("latlong").innerHTML = "Coordinates (Merged): " + latlongR;
         document.getElementById("tak").innerHTML = "TAK: " + takR;
         document.getElementById("vehicleInfo").innerHTML = "Vehicle info: " + vehicleTypeR;
+        document.getElementById("destination").innerHTML = "Destination: " + destinationR;
 
         const iconUrl = typeR == "BUS" ? 'bus.png' : (typeR == "TROLL" ? 'troll.png' : 'tram.png');
         
@@ -181,7 +195,7 @@
         if (!markers[takR]) {
           markers[takR] = L.marker(markerPosition, {
             icon: L.icon({ iconUrl: iconUrl })
-          }).bindPopup(`<b>Line:</b> ${lineR}<br><b>TAK:</b> ${takR}<br><b>Vehicle info:</b> ${vehicleTypeR}`)
+          }).bindPopup(`<b>Line:</b> ${lineR}<br><b>TAK:</b> ${takR}<br><b>Vehicle info:</b> ${vehicleTypeR}<br><b>Destination:</b> ${destinationR}`)
             .addTo(map);
         } else {
           markers[takR].setLatLng(markerPosition);

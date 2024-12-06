@@ -189,6 +189,29 @@ io.on('connection', (socket) => {
             writeToLog('errors_log.txt', caughtError);
         }
     });
+    socket.on('destinationSearch', async (destination) => {
+        try {
+            console.log("Input destination: " + destination);
+            saveRequestLogs(socket, destination);
+            if (isRequestMode) {
+                const currentTime = Date.now();
+                if (currentTime - lastFetchTime >= requestModeInterval) {
+                    await fetchAndSaveData("Request Mode");
+                }
+            } else {
+                await fetchAndSaveData("Request Mode");
+            }
+            if (isRequestMode) {
+                clearInterval(requestModeIntervalId);
+            }
+            startRequestModeFetch();
+            fetchDataFromLocalFileByDestination(destination, socket);
+        } catch (error) {
+            var caughtError = "Error processing destinationSearch:", error;
+            console.error(caughtError);
+            writeToLog('errors_log.txt', caughtError);
+        }
+    });
     socket.on('electricBusBulkSearch', async () => {
         console.log("Running bulk electric bus search!");
         saveRequestLogs(socket, "ElectricBusBulkSearch");
@@ -567,6 +590,7 @@ async function fetchDataFromLocalFileByTak(takInput, socket) {
                         const longitude = parseFloat(data[2]) / 1000000;
                         const latitude = parseFloat(data[3]) / 1000000;
                         const tak = data[6];
+                        const destination = data[9];
 
                         let transportTypeDecoded;
 
@@ -632,8 +656,9 @@ async function fetchDataFromLocalFileByTak(takInput, socket) {
                             requestedLong = longitude;
                             requestedLatLong = `${latitude} ${longitude}`;
                             requestedTak = tak;
-                            console.log("[Data fetch complete!] Type:", transportTypeDecoded, "Line number:", lineNumber, "Lat:", latitude, "Long:", longitude, "Coords merge:", requestedLatLong, "TAK:", tak);
-                            socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak, requestedLatLong, vehicleType);
+                            requestedDestination = destination;
+                            console.log("[Data fetch complete!] Type:", transportTypeDecoded, "Line number:", lineNumber, "Lat:", latitude, "Long:", longitude, "Coords merge:", requestedLatLong, "TAK:", tak, "Destination:", requestedDestination);
+                            socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak, requestedLatLong, vehicleType, requestedDestination);
                         } else if (tak !== takInput && takFound !== 1) {
                             takFound = 0;
                             const vehicleNotFoundText = "VEHICLE NOT FOUND!";
@@ -642,6 +667,7 @@ async function fetchDataFromLocalFileByTak(takInput, socket) {
                             requestedLat = vehicleNotFoundText;
                             requestedLong = vehicleNotFoundText;
                             requestedTak = vehicleNotFoundText;
+                            requestedDestination = vehicleNotFoundText;
                         }
                     } catch (error) {
                         console.log("Invalid data format!", line);
@@ -669,6 +695,7 @@ async function fetchDataFromLocalFileByTransportType(transportTypeInput, socket)
                         const longitude = parseFloat(data[2]) / 1000000;
                         const latitude = parseFloat(data[3]) / 1000000;
                         const tak = data[6];
+                        const destination = data[9];
 
                         let transportTypeDecoded;
 
@@ -734,8 +761,9 @@ async function fetchDataFromLocalFileByTransportType(transportTypeInput, socket)
                             requestedLong = longitude;
                             requestedLatLong = `${latitude} ${longitude}`;
                             requestedTak = tak;
-                            console.log("[Data fetch complete!] Type:", transportTypeDecoded, "Line number:", lineNumber, "Lat:", latitude, "Long:", longitude, "Coords merge:", requestedLatLong, "TAK:", tak);
-                            socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak, requestedLatLong, vehicleType);
+                            requestedDestination = destination;
+                            console.log("[Data fetch complete!] Type:", transportTypeDecoded, "Line number:", lineNumber, "Lat:", latitude, "Long:", longitude, "Coords merge:", requestedLatLong, "TAK:", tak, "Destination:", requestedDestination);
+                            socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak, requestedLatLong, vehicleType, requestedDestination);
                         } else if (transportTypeDecoded !== transportTypeInput && transportTypeFound !== 1) {
                             transportTypeFound = 0;
                             const vehicleNotFoundText = "VEHICLE NOT FOUND!";
@@ -744,6 +772,7 @@ async function fetchDataFromLocalFileByTransportType(transportTypeInput, socket)
                             requestedLat = vehicleNotFoundText;
                             requestedLong = vehicleNotFoundText;
                             requestedTak = vehicleNotFoundText;
+                            requestedDestination = vehicleNotFoundText;
                         }
                     } catch (error) {
                         console.log("Invalid data format!", line);
@@ -771,6 +800,7 @@ async function fetchDataFromLocalFileByLineNumber(lineInput, socket) {
                         const longitude = parseFloat(data[2]) / 1000000;
                         const latitude = parseFloat(data[3]) / 1000000;
                         const tak = data[6];
+                        const destination = data[9];
 
                         let transportTypeDecoded;
 
@@ -839,6 +869,7 @@ async function fetchDataFromLocalFileByLineNumber(lineInput, socket) {
                                 requestedLong: longitude,
                                 requestedLatLong: `${latitude} ${longitude}`,
                                 requestedTak: tak,
+                                requestedDestination: destination,
                                 vehicleType,
                             });
                         }
@@ -850,14 +881,109 @@ async function fetchDataFromLocalFileByLineNumber(lineInput, socket) {
         });
         if (results.length > 0) {
             results.forEach(result => {
-                console.log("[Data fetch complete!] Type:", result.requestedType, "Line number:", result.requestedLine, "Lat:", result.requestedLat, "Long:", result.requestedLong, "Coords merge:", result.requestedLatLong, "TAK:", result.requestedTak);
-                socket.emit('takResults', result.requestedType, result.requestedLine, result.requestedLat, result.requestedLong, result.requestedTak, result.requestedLatLong, result.vehicleType);
+                console.log("[Data fetch complete!] Type:", result.requestedType, "Line number:", result.requestedLine, "Lat:", result.requestedLat, "Long:", result.requestedLong, "Coords merge:", result.requestedLatLong, "TAK:", result.requestedTak, "Destination:", result.requestedDestination);
+                socket.emit('takResults', result.requestedType, result.requestedLine, result.requestedLat, result.requestedLong, result.requestedTak, result.requestedLatLong, result.vehicleType, result.requestedDestination);
             });
         } else {
             const vehicleNotFoundText = "VEHICLE NOT FOUND!";
             console.log(vehicleNotFoundText);
-            socket.emit('takResults', vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText);
+            socket.emit('takResults', vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText);
         }
+    } catch (error) {
+        console.error("Error reading local file:", error);
+    }
+}
+
+async function fetchDataFromLocalFileByDestination(destinationInput, socket) {
+    try {
+        const data = fs.readFileSync(localFilePath, 'utf8');
+        const lines = data.split('\n');
+        lines.forEach(line => {
+            if (line) {
+                const data = line.split(',');
+                if (data.length >= 9) {
+                    try {
+                        const transportType = parseInt(data[0]);
+                        const lineNumber = parseInt(data[1]);
+                        const longitude = parseFloat(data[2]) / 1000000;
+                        const latitude = parseFloat(data[3]) / 1000000;
+                        const tak = data[6];
+                        const destination = data[9];
+
+                        let transportTypeDecoded;
+
+                        switch (transportType) {
+                            case 1:
+                                transportTypeDecoded = "TROLL";
+                                break;
+                            case 2:
+                                transportTypeDecoded = "BUS";
+                                break;
+                            case 3:
+                                transportTypeDecoded = "TRAM";
+                                break;
+                            case 7:
+                                transportTypeDecoded = "NIGHTBUS";
+                                break;
+                            default:
+                                transportTypeDecoded = "Unknown";
+                                break;
+                        }
+
+                        if (destination && destination.toLowerCase().includes(destinationInput.toLowerCase())) {
+                            if (transportTypeDecoded === "TRAM") {
+                                if (cafTramTakArray.includes(tak)) {
+                                    vehicleType = "CAF Urbos AXL";
+                                } else if (pesaTramTakArray.includes(tak)) {
+                                    vehicleType = "PESA Twist 147N";
+                                } else if (kt6tmTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT6 TM";
+                                } else if (kt4suTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT4 SU";
+                                } else if (kt4tmrTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT4 TMR";
+                                } else if (kt4dTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT4 D";
+                                } else if (kt4tmTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT4 TM";
+                                } else {
+                                    vehicleType = "-- Info unavailable --";
+                                }
+                            } else if (transportTypeDecoded === "BUS") {
+                                if (electricBusTakArray.includes(tak)) {
+                                    vehicleType = "Solaris Urbino IV 12 Electric";
+                                } else if (volvohybridTakArray.includes(tak)) {
+                                    vehicleType = "Volvo 7900 Hybrid";
+                                } else if (a40TakArray.includes(tak)) {
+                                    vehicleType = "MAN a40";
+                                } else if (a78TakArray.includes(tak)) {
+                                    vehicleType = "MAN a78";
+                                } else if (a21TakArray.includes(tak)) {
+                                    vehicleType = "MAN a21";
+                                } else if (urbino12array.includes(tak)) {
+                                    vehicleType = "Solaris URBINO 12 CNG";
+                                } else if (urbino18array.includes(tak)) {
+                                    vehicleType = "Solaris URBINO 18 CNG";
+                                }
+                            } else {
+                                vehicleType = "-- Info unavailable --";
+                            }
+                            requestedType = transportTypeDecoded;
+                            requestedLine = lineNumber;
+                            requestedLat = latitude;
+                            requestedLong = longitude;
+                            requestedLatLong = `${latitude} ${longitude}`;
+                            requestedTak = tak;
+                            requestedDestination = destination;
+                            console.log("[Data fetch complete!] Type:", transportTypeDecoded, "Line number:", lineNumber, "Lat:", latitude, "Long:", longitude, "Coords merge:", requestedLatLong, "TAK:", tak, "Destination:", requestedDestination);
+                            socket.emit('takResults', requestedType, requestedLine, requestedLat, requestedLong, requestedTak, requestedLatLong, vehicleType, requestedDestination);
+                        }
+                    } catch (error) {
+                        console.log("Invalid data format!", line);
+                    }
+                }
+            }
+        });
     } catch (error) {
         console.error("Error reading local file:", error);
     }
