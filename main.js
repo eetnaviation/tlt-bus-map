@@ -11,9 +11,16 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
+// --- BEGIN CONFIGURABLE PART --- //
+
 const currentGpsFilePath = 'gps/gps.txt'
 const gpsFilePath = 'gps/';
 const logFilePath = 'logs/';
+const defaultFetchInterval = 120000; //120sec
+const requestModeInterval = 30000; //30sec
+const requestModeDuration = 120000; //120sec
+
+// --- END CONFIGURABLE PART --- //
 
 let cafTramTakArray = ["501", "502", "503", "504", "505", "506", "507", "508", "509", "510", "511", "512", "513", "514", "515", "516", "517", "518", "519", "520"];
 let pesaTramTakArray = ["521", "522", "523", "524", "525", "526", "527", "528", "529", "530", "531", "532", "533", "534"];
@@ -121,9 +128,6 @@ let requestedLatLong = "Unfetched";
 let isRequestMode = false;
 let requestModeIntervalId = null;
 let lastFetchTime = 0;
-const defaultFetchInterval = 120000; //120sec
-const requestModeInterval = 30000; //30sec
-const requestModeDuration = 120000; //120sec
 
 console.log("Server initialized!");
 
