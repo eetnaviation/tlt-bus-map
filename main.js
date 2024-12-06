@@ -159,9 +159,32 @@ io.on('connection', (socket) => {
                 clearInterval(requestModeIntervalId);
             }
             startRequestModeFetch();
-            fetchDataFromLocalFile(tak, socket);
+            fetchDataFromLocalFileByTak(tak, socket);
         } catch (error) {
             var caughtError = "Error processing takSearch:", error;
+            console.error(caughtError);
+            writeToLog('errors_log.txt', caughtError);
+        }
+    });
+    socket.on('lineSearch', async (line) => {
+        try {
+            console.log("Input line: " + line);
+            saveRequestLogs(socket, line);
+            if (isRequestMode) {
+                const currentTime = Date.now();
+                if (currentTime - lastFetchTime >= requestModeInterval) {
+                    await fetchAndSaveData("Request Mode");
+                }
+            } else {
+                await fetchAndSaveData("Request Mode");
+            }
+            if (isRequestMode) {
+                clearInterval(requestModeIntervalId);
+            }
+            startRequestModeFetch();
+            fetchDataFromLocalFileByLineNumber(line, socket);
+        } catch (error) {
+            var caughtError = "Error processing lineSearch:", error;
             console.error(caughtError);
             writeToLog('errors_log.txt', caughtError);
         }
@@ -183,7 +206,7 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             electricBusTakArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
         } catch (error) {
             var caughtError = "Error processing electricBusBulkSearch:", error;
@@ -208,7 +231,7 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             a40TakArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
         } catch (error) {
             var caughtError = "Error processing a40BulkSearch: ", error;
@@ -233,7 +256,7 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             a21TakArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
         } catch (error) {
             var caughtError = "Error processing a21BulkSearch: ", error;
@@ -258,7 +281,7 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             a78TakArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
         } catch (error) {
             var caughtError = "Error processing a78BulkSearch: ", error;
@@ -283,7 +306,7 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             volvohybridTakArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
         } catch (error) {
             var caughtError = "Error processing volvo7900BulkSearch: ", error;
@@ -308,7 +331,7 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             pesaTramTakArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
         } catch (error) {
             var caughtError = "Error processing pesaTramBulkSearch: ", error;
@@ -356,7 +379,7 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             cafTramTakArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
         } catch (error) {
             var caughtError = "Error processing cafBulkSearch: ", error;
@@ -381,19 +404,19 @@ io.on('connection', (socket) => {
             }
             startRequestModeFetch();
             kt6tmTramArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
             kt4suTramArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
             kt4tmrTramArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
             kt4dTramArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
             kt4tmTramArray.forEach((takToSearch) => {
-                fetchDataFromLocalFile(takToSearch, socket);
+                fetchDataFromLocalFileByTak(takToSearch, socket);
             });
         } catch (error) {
             var caughtError = "Error processing tatraBulkSearch: ", error;
@@ -529,7 +552,7 @@ function startRequestModeFetch() {
     }, requestModeDuration);
 }
 
-async function fetchDataFromLocalFile(takInput, socket) {
+async function fetchDataFromLocalFileByTak(takInput, socket) {
     try {
         const data = fs.readFileSync(localFilePath, 'utf8');
         const lines = data.split('\n');
@@ -728,6 +751,113 @@ async function fetchDataFromLocalFileByTransportType(transportTypeInput, socket)
                 }
             }
         });
+    } catch (error) {
+        console.error("Error reading local file:", error);
+    }
+}
+
+async function fetchDataFromLocalFileByLineNumber(lineInput, socket) {
+    try {
+        const data = fs.readFileSync(localFilePath, 'utf8');
+        const lines = data.split('\n');
+        const results = [];
+        lines.forEach(line => {
+            if (line) {
+                const data = line.split(',');
+                if (data.length >= 9) {
+                    try {
+                        const transportType = parseInt(data[0]);
+                        const lineNumber = parseInt(data[1]);
+                        const longitude = parseFloat(data[2]) / 1000000;
+                        const latitude = parseFloat(data[3]) / 1000000;
+                        const tak = data[6];
+
+                        let transportTypeDecoded;
+
+                        switch (transportType) {
+                            case 1:
+                                transportTypeDecoded = "TROLL";
+                                break;
+                            case 2:
+                                transportTypeDecoded = "BUS";
+                                break;
+                            case 3:
+                                transportTypeDecoded = "TRAM";
+                                break;
+                            case 7:
+                                transportTypeDecoded = "NIGHTBUS";
+                                break;
+                            default:
+                                transportTypeDecoded = "Unknown";
+                                break;
+                        }
+                        if (lineNumber == lineInput) {
+                            let vehicleType;
+                            if (transportTypeDecoded === "TRAM") {
+                                if (cafTramTakArray.includes(tak)) {
+                                    vehicleType = "CAF Urbos AXL";
+                                } else if (pesaTramTakArray.includes(tak)) {
+                                    vehicleType = "PESA Twist 147N";
+                                } else if (kt6tmTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT6 TM";
+                                } else if (kt4suTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT4 SU";
+                                } else if (kt4tmrTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT4 TMR";
+                                } else if (kt4dTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT4 D";
+                                } else if (kt4tmTramArray.includes(tak)) {
+                                    vehicleType = "Tatra KT4 TM";
+                                } else {
+                                    vehicleType = "-- Info unavailable --";
+                                }
+                            } else if (transportTypeDecoded === "BUS") {
+                                if (electricBusTakArray.includes(tak)) {
+                                    vehicleType = "Solaris Urbino IV 12 Electric";
+                                } else if (volvohybridTakArray.includes(tak)) {
+                                    vehicleType = "Volvo 7900 Hybrid";
+                                } else if (a40TakArray.includes(tak)) {
+                                    vehicleType = "MAN a40";
+                                } else if (a78TakArray.includes(tak)) {
+                                    vehicleType = "MAN a78";
+                                } else if (a21TakArray.includes(tak)) {
+                                    vehicleType = "MAN a21";
+                                } else if (urbino12array.includes(tak)) {
+                                    vehicleType = "Solaris URBINO 12 CNG";
+                                } else if (urbino18array.includes(tak)) {
+                                    vehicleType = "Solaris URBINO 18 CNG";
+                                } else {
+                                    vehicleType = "-- Info unavailable --";
+                                }
+                            } else {
+                                vehicleType = "-- Info unavailable --";
+                            }
+                            results.push({
+                                requestedType: transportTypeDecoded,
+                                requestedLine: lineNumber,
+                                requestedLat: latitude,
+                                requestedLong: longitude,
+                                requestedLatLong: `${latitude} ${longitude}`,
+                                requestedTak: tak,
+                                vehicleType,
+                            });
+                        }
+                    } catch (error) {
+                        console.log("Invalid data format!", line);
+                    }
+                }
+            }
+        });
+        if (results.length > 0) {
+            results.forEach(result => {
+                console.log("[Data fetch complete!] Type:", result.requestedType, "Line number:", result.requestedLine, "Lat:", result.requestedLat, "Long:", result.requestedLong, "Coords merge:", result.requestedLatLong, "TAK:", result.requestedTak);
+                socket.emit('takResults', result.requestedType, result.requestedLine, result.requestedLat, result.requestedLong, result.requestedTak, result.requestedLatLong, result.vehicleType);
+            });
+        } else {
+            const vehicleNotFoundText = "VEHICLE NOT FOUND!";
+            console.log(vehicleNotFoundText);
+            socket.emit('takResults', vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText, vehicleNotFoundText);
+        }
     } catch (error) {
         console.error("Error reading local file:", error);
     }

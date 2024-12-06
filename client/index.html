@@ -22,7 +22,15 @@
     <form id="search-form">
       <label for="bus-id">Enter TAK:</label>
       <input type="text" id="bus-id" name="bus-id">
-      <button type="submit">Search</button>
+      <button type="submit">Search by TAK</button>
+    </form>
+    <form id="search-by-line-form">
+      <label for="bus-line">Enter LINE:</label>
+      <input type="text" id="bus-line" name="bus-line">
+      <button type="submit">Search by line</button>
+    </form>
+    <form id="clear-map">
+      <button type="submit">Clear map</button>
     </form>
     <form id="bulk-search">
       <p>Bulk searches:</p>
@@ -76,6 +84,27 @@
         event.preventDefault();
         var tak = document.getElementById('bus-id').value.trim();
         socket.emit('takSearch', tak);
+      });
+
+      document.getElementById('search-by-line-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        var line = document.getElementById('bus-line').value.trim();
+        socket.emit('lineSearch', line);
+      });
+
+      document.getElementById('clear-map').addEventListener('submit', function (event) {
+        event.preventDefault();
+        Object.keys(markers).forEach(tak => {
+          markers[tak].remove();
+        });
+        markers = {};
+        document.getElementById("type").innerHTML = "Type: " + "UNFETCHED";
+        document.getElementById("line").innerHTML = "Current line: " + "UNFETCHED";
+        document.getElementById("lat").innerHTML = "Latitude: " + "UNFETCHED";
+        document.getElementById("long").innerHTML = "Longitude: " + "UNFETCHED";
+        document.getElementById("latlong").innerHTML = "Coordinates (Merged): " + "UNFETCHED";
+        document.getElementById("tak").innerHTML = "TAK: " + "UNFETCHED";
+        document.getElementById("vehicleInfo").innerHTML = "Vehicle info: " + "UNFETCHED";
       });
 
       document.getElementById('bulk-search').addEventListener('submit', function (event) {
