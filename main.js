@@ -11,7 +11,9 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
-const localFilePath = 'gps/gps.txt'
+const currentGpsFilePath = 'gps/gps.txt'
+const gpsFilePath = 'gps/';
+const logFilePath = 'logs/';
 
 let cafTramTakArray = ["501", "502", "503", "504", "505", "506", "507", "508", "509", "510", "511", "512", "513", "514", "515", "516", "517", "518", "519", "520"];
 let pesaTramTakArray = ["521", "522", "523", "524", "525", "526", "527", "528", "529", "530", "531", "532", "533", "534"];
@@ -513,7 +515,7 @@ function saveRequestLogs(socket, takInput) {
 }
 
 function writeToLog(logfile, logdata) {
-    var realLogFile = path.join('logs/', logfile);
+    var realLogFile = path.join(logFilePath, logfile);
     fs.appendFile(realLogFile, logdata, 'utf8', (err) => {
         if (err) {
             console.error('Error writing to file:', err);
@@ -529,14 +531,14 @@ async function fetchAndSaveData(fetchMode) {
         const logData = `${date} - Fetching new data (${fetchMode})...\n`;
         writeToLog('fetch_log.txt', logData);
 
-        if (fs.existsSync(localFilePath)) {
-            const oldFilePath = `gps/gps-${timestamp}.txt`
-            fs.renameSync(localFilePath, oldFilePath);
+        if (fs.existsSync(currentGpsFilePath)) {
+            const oldFilePath = gpsFilePath +  `gps-${timestamp}.txt`;
+            fs.renameSync(currentGpsFilePath, oldFilePath);
         }
 
         const response = await axios.get(url);
         if (response.status === 200) {
-            fs.writeFileSync(localFilePath, response.data, 'utf8');
+            fs.writeFileSync(currentGpsFilePath, response.data, 'utf8');
             console.log("Fetch completed.");
             const logData = `${date} - Fetching completed (${fetchMode})!\n`;
             writeToLog('fetch_log.txt', logData);
@@ -577,7 +579,7 @@ function startRequestModeFetch() {
 
 async function fetchDataFromLocalFileByTak(takInput, socket) {
     try {
-        const data = fs.readFileSync(localFilePath, 'utf8');
+        const data = fs.readFileSync(currentGpsFilePath, 'utf8');
         const lines = data.split('\n');
         let takFound = 0;
         lines.forEach(line => {
@@ -682,7 +684,7 @@ async function fetchDataFromLocalFileByTak(takInput, socket) {
 
 async function fetchDataFromLocalFileByTransportType(transportTypeInput, socket) {
     try {
-        const data = fs.readFileSync(localFilePath, 'utf8');
+        const data = fs.readFileSync(currentGpsFilePath, 'utf8');
         const lines = data.split('\n');
         let transportTypeFound = 0;
         lines.forEach(line => {
@@ -787,7 +789,7 @@ async function fetchDataFromLocalFileByTransportType(transportTypeInput, socket)
 
 async function fetchDataFromLocalFileByLineNumber(lineInput, socket) {
     try {
-        const data = fs.readFileSync(localFilePath, 'utf8');
+        const data = fs.readFileSync(currentGpsFilePath, 'utf8');
         const lines = data.split('\n');
         const results = [];
         lines.forEach(line => {
@@ -896,7 +898,7 @@ async function fetchDataFromLocalFileByLineNumber(lineInput, socket) {
 
 async function fetchDataFromLocalFileByDestination(destinationInput, socket) {
     try {
-        const data = fs.readFileSync(localFilePath, 'utf8');
+        const data = fs.readFileSync(currentGpsFilePath, 'utf8');
         const lines = data.split('\n');
         lines.forEach(line => {
             if (line) {
