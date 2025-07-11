@@ -1,73 +1,237 @@
 <!DOCTYPE html>
-  <html lang="en">
-
+<html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TLT Location Finder</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <style>
-      #map {
-        height: 1000px;
+      :root {
+        --background-color: #f9f9f9;  /* Background color */
+        --button-color: #4CAF50;      /* Button background color */
+        --button-text-color: white;    /* Button text color */
+        --input-background-color: white; /* Input background color */
+        --input-border-color: #ccc;    /* Input border color */
+        --text-color: #333;            /* General text color */
+        --box-border-color: #ddd;      /* Box outline color */
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: var(--background-color);  /* Use background color variable */
+        color: var(--text-color);                    /* Use text color variable */
+      }
+
+      .title {
+        text-align: center;
+      }
+
+      .search-wrapper {
+        display: flex;
+        justify-content: center;  /* Center align the search wrapper */
+        gap: 20px;               /* Space between the boxes */
+      }
+
+      .search-fields, #bulk-search {
+        display: flex;
+        flex-direction: column;  /* Stack elements vertically within each box */
+        gap: 10px;
+        border: 1px solid var(--box-border-color);  /* Box outline */
+        padding: 20px;           /* Padding inside the box */
+        border-radius: 8px;      /* Rounded corners */
+        background-color: var(--input-background-color); /* Background color for the box */
+        max-width: 400px;        /* Max width for each box */
+        width: 100%;             /* Full width for boxes */
+      }
+
+      .search-fields form {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+      }
+
+      input[type="text"] {
+        padding: 8px;
+        border: 1px solid var(--input-border-color); /* Input border color */
+        border-radius: 4px;  /* Rounded corners for inputs */
+        width: 100%;          /* Full width for inputs */
+      }
+
+      button {
+        background-color: var(--button-color); /* Button background color */
+        color: var(--button-text-color);        /* Button text color */
+        border: none;                           /* No border */
+        padding: 10px 15px;                     /* Padding for buttons */
+        border-radius: 4px;                     /* Rounded corners for buttons */
+        cursor: pointer;                        /* Pointer cursor on hover */
+      }
+
+      button:hover {
+        opacity: 0.9;  /* Slightly transparent on hover */
+      }
+
+      #clear-map {
+        margin-top: 20px;
         width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      #map {
+        height: 512px;  /* Set the height of the map */
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .search-wrapper {
+          flex-direction: column;  /* Stack elements vertically on small screens */
+        }
+
+        .search-fields, #bulk-search {
+          width: 100%;  /* Full width for boxes on mobile */
+        }
+      }
+
+      .theme-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        user-select: none;
+        margin-bottom: 20px;
+      }
+
+      .theme-switch input {
+        display: none;
+      }
+
+      .theme-switch .slider {
+        position: relative;
+        width: 40px;
+        height: 20px;
+        background-color: #ccc;
+        border-radius: 34px;
+        transition: background-color 0.2s;
+      }
+
+      .theme-switch .slider::before {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 1px;
+        top: 1px;
+        background-color: white;
+        border-radius: 50%;
+        transition: transform 0.2s;
+      }
+
+      .theme-switch input:checked + .slider {
+        background-color: #4CAF50;
+      }
+
+      .theme-switch input:checked + .slider::before {
+        transform: translateX(20px);
+      }
+
+      .dark-mode {
+        --background-color: #1a1a1a;
+        --button-color: #2e7d32;
+        --button-text-color: #f5f5f5;
+        --input-background-color: #2a2a2a;
+        --input-border-color: #666;
+        --text-color: #e0e0e0;
+        --box-border-color: #555;
+      }
+
+      .dark-mode input[type="text"] {
+        background-color: var(--input-background-color);
+        color: var(--text-color);
+        border: 1px solid var(--input-border-color);
+      }
+
+      .dark-mode input[type="text"]::placeholder {
+        color: #aaaaaa;
+      }
+
+      .dark-mode input[type="checkbox"] {
+        accent-color: #4caf50;
+        background-color: var(--input-background-color);
+        border: 1px solid var(--input-border-color);
+      }
+
+      .dark-mode body {
+        background-color: var(--background-color);
+        color: var(--text-color);
       }
     </style>
   </head>
 
   <body>
-    <picture>
-      <img src="http://assets.velend.eu:2052/assets/velend_eu-tltmap/velendeulogo.jpg" alt="velendeulogojpg" style="float: right; margin-left: 15px; width: 25%;">
-    </picture>
-    <h2>TLT Location Finder</h2>
-    <form id="search-form">
-      <label for="bus-id">Enter TAK:</label>
-      <input type="text" id="bus-id" name="bus-id">
-      <button type="submit">Search by TAK</button>
-    </form>
-    <form id="search-by-line-form">
-      <label for="bus-line">Enter LINE:</label>
-      <input type="text" id="bus-line" name="bus-line">
-      <button type="submit">Search by line</button>
-    </form>
-    <form id="search-by-destination-form">
-      <label for="bus-destination">Enter DESTINATION:</label>
-      <input type="text" id="bus-destination" name="bus-destination">
-      <button type="submit">Search by destination</button>
-    </form>
+    <label class="theme-switch">
+      Light Mode
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider"></span>
+      Dark Mode
+    </label>
+    <div class="title">
+      <h2>TLT Location Finder</h2>
+      <p>Find other applications like this at <a href="https://velend.eu/">https://velend.eu/</a></p>
+    </div>
+    <div class="form-row">
+      <div class="search-wrapper">
+        <div class="search-fields">
+          <form id="search-form">
+            <label for="bus-id">TAK:</label>
+            <input type="text" id="bus-id" name="bus-id" placeholder="Enter TAK" required>
+            <button type="submit">Search</button>
+          </form>
+          <form id="search-by-line-form">
+            <label for="bus-line">LINE:</label>
+            <input type="text" id="bus-line" name="bus-line" placeholder="Enter LINE" required>
+            <button type="submit">Search</button>
+          </form>
+          <form id="search-by-destination-form">
+            <label for="bus-destination">DESTINATION:</label>
+            <input type="text" id="bus-destination" name="bus-destination" placeholder="Enter DESTINATION" required>
+            <button type="submit">Search</button>
+          </form>
+        </div>
+        <div id="bulk-search">
+          <p>Bulk searches:</p>
+          <div>
+            <label><input type="checkbox" id="pesaSearch"> Pesa Twist</label>
+            <label><input type="checkbox" id="cafSearch"> CAF Urbos</label>
+            <label><input type="checkbox" id="tatraSearch"> Tatra trams</label>
+          </div>
+          <div>
+            <label><input type="checkbox" id="a40Search"> MAN a40</label>
+            <label><input type="checkbox" id="a78Search"> MAN a78</label>
+            <label><input type="checkbox" id="a21Search"> MAN a21</label>
+          </div>
+          <div>
+            <label><input type="checkbox" id="volvo7900Search"> Volvo 7900H</label>
+            <label><input type="checkbox" id="electricbusSearch"> Urbino Electric</label>
+          </div>
+          <div>
+            <label><input type="checkbox" id="tramSearch"> Show all trams</label>
+            <label><input type="checkbox" id="busSearch"> Show all buses</label>
+          </div>
+          <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button type="button" id="searchButton">Search</button>
+            <button type="button" id="searchAllVehicles">Show all vehicles</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <form id="clear-map">
-      <button type="submit">Clear map</button>
-    </form>
-    <form id="bulk-search">
-      <p>Bulk searches:</p>
-      <div>
-        <button type="press" id="pesaSearch">Pesa Twist</button>
-        <button type="click" id="cafSearch">CAF Urbos</button>
-        <button type="click" id="tatraSearch">Tatra trams</button>
+      <div style="text-align: center; margin-top: 1rem;">
+        <button type="submit">Clear map</button>
       </div>
-      <div>
-        <button type="click" id="a40Search">MAN a40</button>
-        <button type="click" id="a78Search">MAN a78</button>
-        <button type="click" id="a21Search">MAN a21</button>
-      </div>
-      <div>
-        <button type="click" id="volvo7900Search">Volvo 7900H</button>
-        <button type="click" id="electricbusSearch">Urbino Electric</button>
-      </div>
-      <div>
-        <button type="click" id="tramSearch">Show all trams</button>
-        <button type="click" id="busSearch">Show all buses</button>
-        <button type="click" id="continousAll">Show all vehicles</button>
-      </div>
-    </form>
-    <form id="recievedData">
-      <p id="type">Type: UNFETCHED</p>
-      <p id="line">Current line: UNFETCHED</p>
-      <p id="lat">Latitude: UNFETCHED</p>
-      <p id="long">Longitude: UNFETCHED</p>
-      <p id="latlong">Coordinates (Merged): UNFETCHED</p>
-      <p id="tak">TAK: UNFETCHED</p>
-      <p id="vehicleInfo">Vehicle info: UNFETCHED</p>
-      <p id="destination">Destination: UNFETCHED</p>
     </form>
 
     <div id="map" style="height:512px"></div>
@@ -77,6 +241,33 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <script>
+        (function() {
+        const toggle = document.getElementById('darkModeToggle');
+        const userPref = localStorage.getItem('theme');
+
+        function applyTheme(mode) {
+        if (mode === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+      }
+      }
+
+        if (userPref) {
+        toggle.checked = userPref === 'dark';
+        applyTheme(userPref);
+      } else {
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        toggle.checked = systemPrefersDark;
+        applyTheme(systemPrefersDark ? 'dark' : 'light');
+      }
+
+        toggle.addEventListener('change', () => {
+        const mode = toggle.checked ? 'dark' : 'light';
+        localStorage.setItem('theme', mode);
+        applyTheme(mode);
+      });
+      })();
       var socket = io();
 
       var map = L.map('map').setView([59.43041, 24.75924], 13);
@@ -110,61 +301,28 @@
           markers[tak].remove();
         });
         markers = {};
-        document.getElementById("type").innerHTML = "Type: " + "UNFETCHED";
-        document.getElementById("line").innerHTML = "Current line: " + "UNFETCHED";
-        document.getElementById("lat").innerHTML = "Latitude: " + "UNFETCHED";
-        document.getElementById("long").innerHTML = "Longitude: " + "UNFETCHED";
-        document.getElementById("latlong").innerHTML = "Coordinates (Merged): " + "UNFETCHED";
-        document.getElementById("tak").innerHTML = "TAK: " + "UNFETCHED";
-        document.getElementById("vehicleInfo").innerHTML = "Vehicle info: " + "UNFETCHED";
-        document.getElementById("destination").innerHTML = "Destination: " + "UNFETCHED";
       });
 
-      document.getElementById('bulk-search').addEventListener('submit', function (event) {
-        event.preventDefault();
+      document.getElementById('searchButton').addEventListener('click', function () {
+        const selectedSearches = {
+          electricBusBulkSearch: document.getElementById('electricbusSearch').checked,
+          pesaTramBulkSearch: document.getElementById('pesaSearch').checked,
+          tramBulkSearch: document.getElementById('tramSearch').checked,
+          busBulkSearch: document.getElementById('busSearch').checked,
+          cafBulkSearch: document.getElementById('cafSearch').checked,
+          tatraBulkSearch: document.getElementById('tatraSearch').checked,
+          volvo7900BulkSearch: document.getElementById('volvo7900Search').checked,
+          a78BulkSearch: document.getElementById('a78Search').checked,
+          a21BulkSearch: document.getElementById('a21Search').checked,
+          a40BulkSearch: document.getElementById('a40Search').checked
+        };
+
+        for (const [key, value] of Object.entries(selectedSearches)) {
+          if (value) socket.emit(key);
+        }
       });
 
-      document.getElementById('electricbusSearch').addEventListener('click', function () {
-        socket.emit('electricBusBulkSearch');
-      });
-
-      document.getElementById('pesaSearch').addEventListener('click', function () {
-        socket.emit('pesaTramBulkSearch');
-      });
-
-      document.getElementById('tramSearch').addEventListener('click', function () {
-        socket.emit('tramBulkSearch');
-      });
-
-      document.getElementById('busSearch').addEventListener('click', function () {
-        socket.emit('busBulkSearch');
-      });
-
-      document.getElementById('cafSearch').addEventListener('click', function () {
-        socket.emit('cafBulkSearch');
-      });
-
-      document.getElementById('tatraSearch').addEventListener('click', function () {
-        socket.emit('tatraBulkSearch');
-      });
-
-      document.getElementById('volvo7900Search').addEventListener('click', function () {
-        socket.emit('volvo7900BulkSearch');
-      });
-
-      document.getElementById('a78Search').addEventListener('click', function () {
-        socket.emit('a78BulkSearch');
-      });
-
-      document.getElementById('a21Search').addEventListener('click', function () {
-        socket.emit('a21BulkSearch');
-      });
-
-      document.getElementById('a40Search').addEventListener('click', function () {
-        socket.emit('a40BulkSearch');
-      });
-      
-      document.getElementById('continousAll').addEventListener('click', function () {
+      document.getElementById('searchAllVehicles').addEventListener('click', function () {
         socket.emit('continousAllReq');
       });
 
@@ -180,24 +338,16 @@
         console.log("Vehicle info:", vehicleTypeR);
         console.log("Destination:", destinationR);
 
-        document.getElementById("type").innerHTML = "Type: " + typeR;
-        document.getElementById("line").innerHTML = "Current line: " + lineR;
-        document.getElementById("lat").innerHTML = "Latitude: " + latR;
-        document.getElementById("long").innerHTML = "Longitude: " + longR;
-        document.getElementById("latlong").innerHTML = "Coordinates (Merged): " + latlongR;
-        document.getElementById("tak").innerHTML = "TAK: " + takR;
-        document.getElementById("vehicleInfo").innerHTML = "Vehicle info: " + vehicleTypeR;
-        document.getElementById("destination").innerHTML = "Destination: " + destinationR;
 
         const iconUrl = typeR == "BUS" ? 'bus.png' : (typeR == "TROLL" ? 'troll.png' : 'tram.png');
-        
+
         const markerPosition = [latR, longR];
 
         if (!markers[takR]) {
           markers[takR] = L.marker(markerPosition, {
             icon: L.icon({ iconUrl: iconUrl })
-          }).bindPopup(`<b>Line:</b> ${lineR}<br><b>TAK:</b> ${takR}<br><b>Vehicle info:</b> ${vehicleTypeR}<br><b>Destination:</b> ${destinationR}`)
-            .addTo(map);
+          }).bindPopup(`<b>Type:</b> ${typeR}<br><b>Line:</b> ${lineR}<br><b>TAK:</b> ${takR}<br><b>Vehicle info:</b> ${vehicleTypeR}<br><b>Destination:</b> ${destinationR}`)
+                  .addTo(map);
         } else {
           markers[takR].setLatLng(markerPosition);
         }
